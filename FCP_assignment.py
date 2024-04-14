@@ -236,13 +236,112 @@ def ising_main(population, alpha=None, external=0.0):
 This section contains code for the Defuant Model - task 2 in the assignment
 ==============================================================================================================
 '''
+def defuant_update(opinions, beta, threshold):
+    """
+    Perform a single update according to the Deffuant model.
 
-def defuant_main():
-    #Your code for task 2 goes here
-	pass
+    Args:
+        opinions (numpy.ndarray): Array representing opinions of individuals.
+        beta (float): Coupling parameter.
+        threshold (float): Threshold parameter.
+
+    Returns:
+        None
+    """
+
+    population = opinions.shape[0]
+
+    # Randomly select direction (left or right)
+    neighbour_dir = np.random.choice([1, -1])
+
+    # Randomly selecting a person's index and calculating its corresponding neighbour's index
+    person_idx = np.random.choice(population)
+    neighbour_idx = person_idx + neighbour_dir
+
+    # Ensure neighbour index stays within bounds
+    if person_idx == 0:
+        neighbour_idx = 1
+    elif person_idx == population - 1:
+        neighbour_idx = population - 2
+
+    # Get opinions of the two individuals
+    person = opinions[person_idx]
+    neighbour = opinions[neighbour_idx]
+
+    # Update opinions if difference is below threshold
+    if abs(person - neighbour) < threshold:
+        opinions[person_idx] += beta * (neighbour - person)
+        opinions[neighbour_idx] += beta * (person - neighbour)
+
+def defuant_plot(iteration_data, beta, threshold):
+    """
+    Plot the evolution of opinions over iterations and a histogram of final opinions.
+
+    Args:
+        iteration_data (numpy.ndarray): Array containing opinions at each iteration.
+        beta (float): Coupling parameter.
+        threshold (float): Threshold parameter.
+
+    Returns:
+        None
+    """
+
+    # Create an array of indices for plotting
+    indices = np.arange(iteration_data.shape[0]).reshape(-1, 1)
+    duplicated_indices = np.tile(indices, (1, iteration_data.shape[1]))
+
+    # Plotting
+    fig, ax = plt.subplots(1, 2, figsize=(8, 4))
+
+    ax[0].hist(iteration_data[-1])
+    ax[0].set_xlim([0, 1])
+    ax[0].set_xlabel("Opinion")
+
+    ax[1].scatter(duplicated_indices, iteration_data, color='r', s=5)
+    ax[1].set_ylim([0, 1])
+    ax[1].set_ylabel("Opinion")
+
+    fig.suptitle(f"Coupling: {beta}, Threshold: {threshold}")
+
+    plt.show()
+
+def defuant_main(population=25, iterations=1000, beta=0.5, threshold=0.5):
+    """
+    Run the Deffuant model simulation and visualize the results.
+
+    Args:
+        population (int): Number of individuals.
+        iterations (int): Number of iterations.
+        beta (float): Coupling parameter.
+        threshold (float): Threshold parameter.
+
+    Returns:
+        None
+    """
+    # Generate initial opinions
+    initial_opinions = np.random.uniform(0, 1, size=population)
+
+    # Simulation loop
+    data = []
+    for _ in range(iterations):
+        
+        #appending current iteration opinions to the 2d array (data)
+        data.append(initial_opinions.copy()) 
+
+        # updating opinions
+        defuant_update(initial_opinions, beta=beta, threshold=threshold)
+
+    data = np.array(data)
+
+    # Plot results
+    defuant_plot(data, beta=beta, threshold=threshold)
+
+
+
 def test_defuant():
     #Your code for task 2 goes here
-	pass
+    pass
+
 
 '''
 ==============================================================================================================
