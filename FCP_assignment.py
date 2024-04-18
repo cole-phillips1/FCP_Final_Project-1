@@ -110,7 +110,7 @@ class Network:
             node_x = network_radius * np.cos(node_angle)
             node_y = network_radius * np.sin(node_angle)
             
-            circle = plt.Circle((node_x, node_y), 0.3*num_nodes, color=cm.hot(node.value))
+            circle = plt.Circle((node_x, node_y), 0.9*num_nodes, color=cm.hot(node.value))
             ax.add_patch(circle)
             
             for neighbour_index in range(i+1, num_nodes):
@@ -120,8 +120,8 @@ class Network:
                     neighbour_y = network_radius * np.sin(neighbour_angle)
                     
                     ax.plot((node_x, neighbour_x), (node_y, neighbour_y), color='black')
+        plt.show()
 
-        
 
 def test_networks():
 
