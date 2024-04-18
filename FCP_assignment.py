@@ -259,10 +259,8 @@ def defuant_update(opinions, beta, threshold):
     neighbour_idx = person_idx + neighbour_dir
 
     # Ensure neighbour index stays within bounds
-    if person_idx == 0:
-        neighbour_idx = 1
-    elif person_idx == population - 1:
-        neighbour_idx = population - 2
+    if person_idx == population - 1: # end of list
+        neighbour_idx = 0
 
     # Get opinions of the two individuals
     person = opinions[person_idx]
@@ -355,3 +353,5 @@ def main():
 
 if __name__=="__main__":
     main()
+    
+defuant_main()
