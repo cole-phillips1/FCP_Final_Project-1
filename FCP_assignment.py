@@ -392,13 +392,14 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-ring_network", type=int, help="enter a flag -ring_network and value")
     parser.add_argument("-small_world", type=int, help="enter a flag -small_network and value")
+    parser.add_argument("-probability",type=float,default=0.00001,help="enter a flag -probability followed by a float between 0 and 1")
     parser.add_argument("-re_wire", type=float, default=0.2, help="enter a float within a range of 0 and 1")
     args = parser.parse_args()
 
     network = Network()
 
     if args.ring_network is not None:
-        network.make_ring_network(args.ring_network, args.re_wire)
+        network.make_ring_network(args.ring_network, args.probability)
         network.plot()
     elif args.small_world is not None:
         network.make_small_world_network(args.small_world, args.re_wire)
