@@ -104,11 +104,14 @@ class Network:
         network_radius = num_nodes * 10
         ax.set_xlim([-1.1*network_radius, 1.1*network_radius])
         ax.set_ylim([-1.1*network_radius, 1.1*network_radius])
+        #this dictionary will store nodes positions
+        positions={}
         #ensuring that all nodes are accounted for
         for (i, node) in enumerate(self.nodes):
             node_angle = i * 2 * np.pi / num_nodes
             node_x = network_radius * np.cos(node_angle)
             node_y = network_radius * np.sin(node_angle)
+            positions[node.index]=(node_x,node_y)
             
             circle = plt.Circle((node_x, node_y), 0.9*num_nodes, color=cm.hot(node.value))
             ax.add_patch(circle)
@@ -118,8 +121,12 @@ class Network:
                     neighbour_angle = neighbour_index * 2 * np.pi / num_nodes
                     neighbour_x = network_radius * np.cos(neighbour_angle)
                     neighbour_y = network_radius * np.sin(neighbour_angle)
+                    width=node.connections[neighbour_index]*2
                     
-                    ax.plot((node_x, neighbour_x), (node_y, neighbour_y), color='black')
+                    ax.plot((node_x, neighbour_x), (node_y, neighbour_y), color='black',linewidth=width)
+        for node in self.nodes:
+            node_x, node_y = positions[node.index]
+            ax.text(node_x, node_y, str(node.index), ha="center", va="center")
         plt.show()
 
 
