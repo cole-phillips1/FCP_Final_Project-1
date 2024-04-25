@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+import argparse
+
 
 class Node:
 
@@ -48,16 +50,52 @@ class Network:
                     node.connections[neighbour_index] = 1
                     self.nodes[neighbour_index].connections[index] = 1
 
-    def make_ring_network(self, N, neighbour_range=1):
-    	#Your code  for task 4 goes here
-        pass
+    def make_ring_network(self,N,re_wire_prob=0.2):
+        self.nodes = []
+        for number in range(N):
+            value = np.random.random()
+            connections = [0 for _ in range(N)]
+            self.nodes.append(Node(value, number, connections))
 
-    def make_small_world_network(self, N, re_wire_prob=0.2):
-    	#Your code for task 4 goes here
-        pass
+            #implementing the one to one connection implicitly
+        for number,node in enumerate(self.nodes):
+            for element in range(number-1,number+2):
+                neighbour_index = element % N
+                if neighbour_index!=number:
+                    node.connections[neighbour_index]=1
+
+        for number, node in enumerate(self.nodes):
+            for neighbour_index, connection in enumerate(node.connections):
+                if connection==1 and np.random.random()<re_wire_prob:
+                    new_neighbour = np.random.choice(self.nodes)
+                    while(new_neighbour == node or new_neighbour.connections[node.index]== 1):
+                        new_neighbour=np.random.choice(self.nodes)
+                    node.connections[neighbour_index]=0
+                    node.connections[new_neighbour.index] = 1
+    def make_small_world_network(self,N,re_wire_prob=0.2):
+        self.nodes=[]
+        #designing the network based on the value inputted by the user
+        for number in range(N):
+            value=np.random.random()
+            connections =[0 for _ in range(N)]
+            self.nodes.append(Node(value, number, connections))
+#implementing network connection beyonf a range of 1 unlike for ring network
+        for number, node in enumerate(self.nodes):
+            for element in range(number-2,number+3):
+                neighbour_index = element % N
+                if neighbour_index != number:
+                    node.connections[neighbour_index]=1
+#introducing the concept of likelyhood with a re_wiring probability
+        for number, node in enumerate(self.nodes):
+            for neighbour_index, connection in enumerate(node.connections):
+                if connection == 1 and np.random.random() < re_wire_prob:
+                    new_neighbour = np.random.choice(self.nodes)
+                    while (new_neighbour == node or new_neighbour.connections[node.index]):
+                        new_neighbour = np.random.choice(self.nodes)
+                    node.connections[neighbour_index] = 0
+                    node.connections[new_neighbour.index] =1
 
     def plot(self):
-        
         fig = plt.figure()
         ax = fig.add_subplot(111)
         ax.set_axis_off()
@@ -66,13 +104,16 @@ class Network:
         network_radius = num_nodes * 10
         ax.set_xlim([-1.1*network_radius, 1.1*network_radius])
         ax.set_ylim([-1.1*network_radius, 1.1*network_radius])
-        
+        #this dictionary will store nodes positions
+        positions={}
+        #ensuring that all nodes are accounted for
         for (i, node) in enumerate(self.nodes):
             node_angle = i * 2 * np.pi / num_nodes
             node_x = network_radius * np.cos(node_angle)
             node_y = network_radius * np.sin(node_angle)
+            positions[node.index]=(node_x,node_y)
             
-            circle = plt.Circle((node_x, node_y), 0.3*num_nodes, color=cm.hot(node.value))
+            circle = plt.Circle((node_x, node_y), 0.9*num_nodes, color=cm.hot(node.value))
             ax.add_patch(circle)
             
             for neighbour_index in range(i+1, num_nodes):
@@ -80,10 +121,14 @@ class Network:
                     neighbour_angle = neighbour_index * 2 * np.pi / num_nodes
                     neighbour_x = network_radius * np.cos(neighbour_angle)
                     neighbour_y = network_radius * np.sin(neighbour_angle)
+                    width=node.connections[neighbour_index]*2
                     
-                    ax.plot((node_x, neighbour_x), (node_y, neighbour_y), color='black')
+                    ax.plot((node_x, neighbour_x), (node_y, neighbour_y), color='black',linewidth=width)
+        for node in self.nodes:
+            node_x, node_y = positions[node.index]
+            ax.text(node_x, node_y, str(node.index), ha="center", va="center")
+        plt.show()
 
-        
 
 def test_networks():
 
@@ -260,8 +305,10 @@ def defuant_update(opinions, beta, threshold):
     neighbour_idx = person_idx + neighbour_dir
 
     # Ensure neighbour index stays within bounds
-    if person_idx == population - 1: # end of list
-        neighbour_idx = 0
+    if person_idx == 0:
+        neighbour_idx = 1
+    elif person_idx == population - 1:
+        neighbour_idx = population - 2
 
     # Get opinions of the two individuals
     person = opinions[person_idx]
@@ -354,9 +401,52 @@ This section contains code for the main function- you should write some code for
 '''
 
 def main():
-    #You should write some code for handling flags here
-    pass
+    ################################ TASK 1 ARGS #############################################
+
+    # write your arguments parsing code here 
+
+
+
+    ################################ TASK 2 ARGS  #############################################
+
+    # write your arguments parsing code here 
+    
+
+
+    ################################ TASK 3 ARGS ##############################################
+
+    # write your arguments parsing code here 
+    
+
+
+    ################################ TASK 4 ARGS ##############################################
+
+    #these arguement ensure the manipulation of the code from the terminal based on the flags given
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-ring_network", type=int, help="enter a flag -ring_network and value")
+    parser.add_argument("-small_world", type=int, help="enter a flag -small_network and value")
+    parser.add_argument("-probability",type=float,default=0.00001,help="enter a flag -probability followed by a float between 0 and 1")
+    parser.add_argument("-re_wire", type=float, default=0.2, help="enter a float within a range of 0 and 1")
+    args = parser.parse_args()
+
+    network = Network()
+
+    if args.ring_network is not None:
+        network.make_ring_network(args.ring_network, args.probability)
+        network.plot()
+    elif args.small_world is not None:
+        network.make_small_world_network(args.small_world, args.re_wire)
+        network.plot()
+    else:
+        print("Set either -ring_network or -small_world flag followed by the re_wiring between 0 and 1")
+
+
+
+    ################################ TASK 5 ARGS #############################################
+
+    # write your arguments parsing code here 
+
+
 
 if __name__=="__main__":
     main()
-    
