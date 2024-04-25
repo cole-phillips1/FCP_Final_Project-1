@@ -236,6 +236,7 @@ def ising_main(population, alpha=None, external=0.0):
 This section contains code for the Defuant Model - task 2 in the assignment
 ==============================================================================================================
 '''
+# helper function 1
 def defuant_update(opinions, beta, threshold):
     """
     Perform a single update according to the Deffuant model.
@@ -271,6 +272,8 @@ def defuant_update(opinions, beta, threshold):
         opinions[person_idx] += beta * (neighbour - person)
         opinions[neighbour_idx] += beta * (person - neighbour)
 
+
+# helper function 2
 def defuant_plot(iteration_data, beta, threshold):
     """
     Plot the evolution of opinions over iterations and a histogram of final opinions.
@@ -303,6 +306,8 @@ def defuant_plot(iteration_data, beta, threshold):
 
     plt.show()
 
+
+# main function - task 2
 def defuant_main(population=25, iterations=1000, beta=0.5, threshold=0.5):
     """
     Run the Deffuant model simulation and visualize the results.
@@ -335,9 +340,10 @@ def defuant_main(population=25, iterations=1000, beta=0.5, threshold=0.5):
     defuant_plot(data, beta=beta, threshold=threshold)
 
 
-
+# test function - task 2
 def test_defuant():
     #Your code for task 2 goes here
+    
     pass
 
 
@@ -354,4 +360,3 @@ def main():
 if __name__=="__main__":
     main()
     
-defuant_main()
