@@ -175,7 +175,8 @@ if 'test_network in sys.argv':
 
 
 
-
+#making a ring network by adopting the concept of likelyhood but with a range of 1
+#the ring network does not achieve higher cluster coefficient and can be rewired
     def make_ring_network(self,N,re_wire_prob=0.2):
         self.nodes = []
         for number in range(N):
@@ -189,7 +190,7 @@ if 'test_network in sys.argv':
                 neighbour_index = element % N
                 if neighbour_index!=number:
                     node.connections[neighbour_index]=1
-
+#this concept was used to design small world but it is not significant while making ring network
         for number, node in enumerate(self.nodes):
             for neighbour_index, connection in enumerate(node.connections):
                 if connection==1 and np.random.random()<re_wire_prob:
