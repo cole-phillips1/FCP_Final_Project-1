@@ -21,14 +21,14 @@ class Network:
             self.nodes = nodes 
 
     def get_mean_degree(self):
+
         # iteration over each node in the network while summing up it's connections to find its degree
         NodeDegree = [sum(node.connections) for node in self.nodes]
 
         return sum(NodeDegree) / len(NodeDegree)
 
-        pass
-
     def get_mean_clustering(self):
+
         # empty list
         clustering_coefficients = []
 
@@ -36,7 +36,8 @@ class Network:
 
             # iteration through connections of each node to find neighbours
             # if a connection exists, ==1
-            Number_of_neighbours = [self.nodes[i] for i, connection in enumerate(node.connections) if connection == 1]
+            Number_of_neighbours = [self.nodes[i] for i, connection in enumerate(node.connections) if
+                                    connection == 1]
 
             # less than 2 neighnours, the clustering coefficient is undefined
             if len(Number_of_neighbours) < 2:
@@ -54,7 +55,7 @@ class Network:
                     if i < j and neighbor1.connections[neighbor2.index] == 1:
                         node_connections += 1
 
-            #use of given formula
+            # Formula given:
             possible_connections = len(Number_of_neighbours) * (len(Number_of_neighbours) - 1) / 2
 
             # To append the results
@@ -62,93 +63,90 @@ class Network:
 
         return sum(clustering_coefficients) / len(clustering_coefficients)
 
-        pass
+    def shortest_path_length(self, start_node):
+
+        # to track if a node has been visited:
+        is_visited = [False] * len(self.nodes)
+
+        Distance = [0] * len(self.nodes)
+        queue = [start_node]
+        is_visited[start_node.index] = True
+        Total_Distance = 0
+        node_count = 0
+
+        # To loop through nodes until every node has been processed:
+        while queue:
+
+            # To remove and return the first node from the queue for processing
+            current_node = queue.pop(0)
+
+            # If a node has been visited:
+            node_count += 1
+
+            Total_Distance += Distance[current_node.index]
+
+            # Iteration over the neighbours (connections) of the current node
+            for i, connection in enumerate(current_node.connections):
+
+                if connection == 1 and not is_visited[i]:
+                    # To mark a node as visited:
+                    is_visited[i] = True
+
+                    # To update the distance:
+                    Distance[i] = Distance[current_node.index] + 1
+
+                    queue.append(self.nodes[i])
+
+        if node_count == 1:
+            # When the only connection is to itself
+
+            return 0
+
+            # subtract the starting node
+        return Total_Distance / (node_count - 1)
 
     def get_mean_path_length(self):
 
-        def shortest_path_length(start_node):
-
-            is_visited = [False] * len(self.nodes)
-            Distance = [0] * len(self.nodes)
-            queue = [start_node]
-            is_visited[start_node.index] = True
-            Total_Distance = 0
-            node_count = 0
-
-            # To loop through nodes until every node has been processed:
-            while queue:
-
-                current_node = queue.pop(0)
-                node_count += 1
-                Total_Distance += Distance[current_node.index]
-
-                for i, connection in enumerate(current_node.connections):
-
-                    if connection == 1 and not is_visited[i]:
-                        is_visited[i] = True
-                        Distance[i] = Distance[current_node.index] + 1
-                        queue.append(self.nodes[i])
-
-            if node_count == 1:
-
-                return 0
-
-            # subtract the starting node
-            return Total_Distance / (node_count - 1)
-
+        # To store the shortest path length from each node:
         path_lengths_list = []
+
         # To iterate through each node and append the shortest path length to a list:
-
         for start_node in self.nodes:
+            path_lengths_list.append(self.shortest_path_length(start_node))
 
-            path_lengths_list.append(shortest_path_length(start_node))
-
+        # Mean calculation:
         return sum(path_lengths_list) / len(self.nodes)
 
-        pass
+    def make_random_network(self, N, connection_probability=0.5):
 
-        # to plot a network of size N with fixed probability of 0,5:
+        self.nodes = []
 
+        for node_number in range(N):
+            value = np.random.random()
+            connections = [0 for _ in range(N)]
+            self.nodes.append(Node(value, node_number, connections))
+
+        for (index, node) in enumerate(self.nodes):
+
+            for neighbour_index in range(index + 1, N):
+
+                if np.random.random() < connection_probability:
+                    node.connections[neighbour_index] = 1
+                    self.nodes[neighbour_index].connections[index] = 1
+
+    # to plot a network of size N with fixed probability of 0,5:
     def plot_network(self):
 
         for node in self.nodes:
+
             for i, connection in enumerate(node.connections):
+
                 if connection == 1:
                     plt.plot([node.index, i], [node.value, self.nodes[i].value], 'k-', linewidth=0.8)
         plt.scatter([node.index for node in self.nodes], [node.value for node in self.nodes], color='g')
         plt.xlabel('Node Number')
-        plt.ylabel('Probability')
         plt.title('Random Size Network')
         plt.show()
-
-# Example usage:
-network = Network()
-network.make_random_network(10)
-network.plot_network()
-
-mean_degree = network.get_mean_degree()
-mean_clustering = network.get_mean_clustering()
-mean_path_length = network.get_mean_path_length()
-
-print("Mean Degree:", mean_degree)
-print("Mean Clustering Coefficient:", mean_clustering)
-print("Mean Path Length:", mean_path_length)
-
-if 'test_network in sys.argv':
-    nodes = []
-    num_nodes = 10
-    for node_number in range(num_nodes):
-        connections = [1 for val in range(num_nodes)]
-        connections[node_number] = 0
-        new_node = Node(0, node_number, connections=connections)
-        nodes.append(new_node)
-    network = Network(nodes)
-
-    assert (network.get_mean_degree() == num_nodes - 1), network.get_mean_degree()
-    assert (network.get_mean_clustering() == 1), network.get_mean_clustering()
-    assert (network.get_mean_path_length() == 1), network.get_mean_path_length()
-    print(network.get_mean_degree())
-    print("correct")
 
 
 
@@ -542,7 +540,41 @@ def main():
 
     ################################ TASK 3 ARGS ##############################################
 
-    # write your arguments parsing code here 
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-network", type=int)
+    parser.add_argument("-test_network", action='store_true')
+
+    args = parser.parse_args()
+    size = args.network
+
+    if args.test_network:
+
+        nodes = []
+        num_nodes = 10
+        for node_number in range(num_nodes):
+            connections = [1 for val in range(num_nodes)]
+            connections[node_number] = 0
+            new_node = Node(0, node_number, connections=connections)
+            nodes.append(new_node)
+        network = Network(nodes)
+
+        assert (network.get_mean_degree() == num_nodes - 1), network.get_mean_degree()
+        assert (network.get_mean_clustering() == 1), network.get_mean_clustering()
+        assert (network.get_mean_path_length() == 1), network.get_mean_path_length()
+        print("correct")
+
+    if args.network:
+        network = Network()
+        network.make_random_network(size)
+        network.plot_network()
+
+        mean_degree = network.get_mean_degree()
+        mean_clustering = network.get_mean_clustering()
+        mean_path_length = network.get_mean_path_length()
+
+        print("Mean Degree:", mean_degree)
+        print("Mean Clustering Coefficient:", mean_clustering)
+        print("Mean Path Length:", mean_path_length)
     
 
 
