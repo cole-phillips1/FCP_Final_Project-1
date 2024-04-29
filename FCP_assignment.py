@@ -188,7 +188,9 @@ class Network:
                 neighbour_index = element % N
                 if neighbour_index!=number:
                     node.connections[neighbour_index]=1
+
 #this concept was used to design small world but it is not significant while making ring network
+#this part is optional however but it helped come up with the small world
         for number, node in enumerate(self.nodes):
             for neighbour_index, connection in enumerate(node.connections):
                 if connection==1 and np.random.random()<re_wire_prob:
@@ -538,14 +540,20 @@ def main():
     
 
 
-    ################################ TASK 3 ARGS ##############################################
-
+    ################################ TASK 3 ARGS and Task 4 args  ##############################################
+#better  when all args are placed in the same block and the flags be specified as the assignment dictates
     parser = argparse.ArgumentParser()
     parser.add_argument("-network", type=int)
     parser.add_argument("-test_network", action='store_true')
+    parser.add_argument("-ring_network", type=int, help="enter a flag -ring_network and value")
+    parser.add_argument("-small_world", type=int, help="enter a flag -small_network and value")
+    parser.add_argument("-probability", type=float, default=0.00001,
+                        help="enter a flag -probability followed by a float between 0 and 1")
+    parser.add_argument("-re_wire", type=float, default=0.2, help="enter a float within a range of 0 and 1")
 
     args = parser.parse_args()
     size = args.network
+    network = Network()
 
     if args.test_network:
 
@@ -563,7 +571,7 @@ def main():
         assert (network.get_mean_path_length() == 1), network.get_mean_path_length()
         print("correct")
 
-    if args.network:
+    elif args.network:
         network = Network()
         network.make_random_network(size)
         network.plot_network()
@@ -575,22 +583,7 @@ def main():
         print("Mean Degree:", mean_degree)
         print("Mean Clustering Coefficient:", mean_clustering)
         print("Mean Path Length:", mean_path_length)
-    
-
-
-    ################################ TASK 4 ARGS ##############################################
-
-    #these arguement ensure the manipulation of the code from the terminal based on the flags given
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-ring_network", type=int, help="enter a flag -ring_network and value")
-    parser.add_argument("-small_world", type=int, help="enter a flag -small_network and value")
-    parser.add_argument("-probability",type=float,default=0.00001,help="enter a flag -probability followed by a float between 0 and 1")
-    parser.add_argument("-re_wire", type=float, default=0.2, help="enter a float within a range of 0 and 1")
-    args = parser.parse_args()
-
-    network = Network()
-
-    if args.ring_network is not None:
+    elif args.ring_network is not None:
         network.make_ring_network(args.ring_network, args.probability)
         network.plot()
     elif args.small_world is not None:
@@ -598,14 +591,6 @@ def main():
         network.plot()
     else:
         print("Set either -ring_network or -small_world flag followed by the re_wiring between 0 and 1")
-
-
-
-    ################################ TASK 5 ARGS #############################################
-
-    # write your arguments parsing code here 
-
-
 
 if __name__=="__main__":
     main()
