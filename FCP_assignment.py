@@ -740,7 +740,7 @@ def main():
         assert (network.get_mean_path_length() == 1), network.get_mean_path_length()
         print("correct")
 
-    elif args.network:
+    if args.network:
         network = Network()
         network.make_random_network(size)
         network.plot_network()
