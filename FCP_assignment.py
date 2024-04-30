@@ -540,11 +540,13 @@ def main():
     
 
 
-    ################################ TASK 3 ARGS and Task 4 args  ##############################################
-#better  when all args are placed in the same block and the flags be specified as the assignment dictates
+#ALL flags be updated here
     parser = argparse.ArgumentParser()
+
+#flags for task 3 start here
     parser.add_argument("-network", type=int)
     parser.add_argument("-test_network", action='store_true')
+#flags for task 4 starts here
     parser.add_argument("-ring_network", type=int, help="enter a flag -ring_network and value")
     parser.add_argument("-small_world", type=int, help="enter a flag -small_network and value")
     parser.add_argument("-probability", type=float, default=0.00001,
@@ -554,7 +556,7 @@ def main():
     args = parser.parse_args()
     size = args.network
     network = Network()
-
+#if block for task 3
     if args.test_network:
 
         nodes = []
@@ -583,6 +585,7 @@ def main():
         print("Mean Degree:", mean_degree)
         print("Mean Clustering Coefficient:", mean_clustering)
         print("Mean Path Length:", mean_path_length)
+#elif blocks for task 4 are added here
     elif args.ring_network is not None:
         network.make_ring_network(args.ring_network, args.probability)
         network.plot()
@@ -592,5 +595,6 @@ def main():
     else:
         print("Set either -ring_network or -small_world flag followed by the re_wiring between 0 and 1")
 
+#add if elif  and else blocks here  for all other tasks ......
 if __name__=="__main__":
     main()
