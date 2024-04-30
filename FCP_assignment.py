@@ -418,7 +418,7 @@ This section contains code for the Defuant Model - task 2 in the assignment
 ==============================================================================================================
 '''
 # helper function 1
-def defuant_update(opinions, beta, threshold):
+def defuant_update(opinions, beta, threshold, is_network=False):
     """
     Perform a single update according to the Deffuant model.
 
@@ -430,37 +430,66 @@ def defuant_update(opinions, beta, threshold):
     Returns:
         None
     """
-
-    population = opinions.shape[0]
-
-    # skip update if no. opinions <= 1 
-    if population <= 1:
-        return None
     
+    if is_network:
+        person = np.random.choice(opinions.nodes)
+
+        # Find indices where value is 1
+        indices_ones = np.where(np.array(person.connections) == 1)[0]
+
+        #print(indices_ones)
+
+        t = indices_ones.shape[0]
+
+        # skip update if the node has no neighbours
+        if t == 0:
+            return None
+
+        
+        # Choose a random index from the indices where value is 1
+        neighbour_index = np.random.choice(indices_ones)
+        neighbour = opinions.nodes[neighbour_index]
+
+        peron_prev = person.value
+        neighbour_prev = neighbour.value
+
+        if abs(peron_prev - neighbour_prev) < threshold:
+                person.value += beta * (neighbour_prev - peron_prev)
+                neighbour.value += beta * (peron_prev - neighbour_prev)
+
+
+
     else:
-        # Randomly select direction (left or right)
-        neighbour_dir = np.random.choice([1, -1])
+        population = opinions.shape[0]
 
-        # Randomly selecting a person's index and calculating its corresponding neighbour's index
-        person_idx = np.random.choice(population)
-        neighbour_idx = person_idx + neighbour_dir
+        # skip update if no. opinions <= 1 
+        if population <= 1:
+            return None
+        
+        else:
+            # Randomly select direction (left or right)
+            neighbour_dir = np.random.choice([1, -1])
 
-        # Ensure neighbour index stays within bounds
-        if person_idx == 0:
-            neighbour_idx = 1
-        elif person_idx == population - 1:
-            neighbour_idx = population - 2
+            # Randomly selecting a person's index and calculating its corresponding neighbour's index
+            person_idx = np.random.choice(population)
+            neighbour_idx = person_idx + neighbour_dir
 
-        # Get opinions of the two individuals
-        person = opinions[person_idx]
-        neighbour = opinions[neighbour_idx]
+            # Ensure neighbour index stays within bounds
+            if person_idx == 0:
+                neighbour_idx = 1
+            elif person_idx == population - 1:
+                neighbour_idx = population - 2
 
-        # Update opinions if difference is below threshold
-        if abs(person - neighbour) < threshold:
-            opinions[person_idx] += beta * (neighbour - person)
-            opinions[neighbour_idx] += beta * (person - neighbour)
+            # Get opinions of the two individuals
+            person = opinions[person_idx]
+            neighbour = opinions[neighbour_idx]
 
-    return True
+            # Update opinions if difference is below threshold
+            if abs(person - neighbour) < threshold:
+                opinions[person_idx] += beta * (neighbour - person)
+                opinions[neighbour_idx] += beta * (person - neighbour)
+
+        return True
 
 
 # helper function 2
@@ -484,6 +513,7 @@ def defuant_plot(iteration_data, beta, threshold):
     # Plotting
     fig, ax = plt.subplots(1, 2, figsize=(8, 4))
 
+
     ax[0].hist(iteration_data[-1])
     ax[0].set_xlim([0, 1])
     ax[0].set_xlabel("Opinion")
@@ -498,7 +528,7 @@ def defuant_plot(iteration_data, beta, threshold):
 
 
 # main function - task 2
-def defuant_main(population=25, iterations=1000, beta=0.2, threshold=0.2):
+def defuant_main(is_network = False, population=25, iterations=1000, beta=0.2, threshold=0.2):
     """
     Run the Deffuant model simulation and visualize the results.
 
@@ -511,23 +541,46 @@ def defuant_main(population=25, iterations=1000, beta=0.2, threshold=0.2):
     Returns:
         None
     """
-    # Generate initial opinions
-    initial_opinions = np.random.uniform(0, 1, size=population)
 
-    # Simulation loop
-    data = []
-    for _ in range(iterations):
+    if not is_network:
         
-        #appending current iteration opinions to the 2d array (data)
-        data.append(initial_opinions.copy()) 
+        # Generate initial 1D opinions
+        initial_opinions = np.random.uniform(0, 1, size=population) 
+        
+        # Simulation loop
+        data = []
+        for _ in range(iterations):
 
-        # updating opinions
-        defuant_update(initial_opinions, beta=beta, threshold=threshold)
+            #appending current iteration opinions to the 2d array (data)
+            data.append(initial_opinions.copy()) 
 
-    data = np.array(data)
+            # updating opinions
+            defuant_update(initial_opinions, beta=beta, threshold=threshold)
 
-    # Plot results
-    defuant_plot(data, beta=beta, threshold=threshold)
+        data = np.array(data)
+
+        # Plot results
+        defuant_plot(data, beta=beta, threshold=threshold)
+
+    else: 
+        network  =  Network()
+        network.make_random_network(N = population)
+
+        # Simulation loop
+        data = []
+        for _ in range(iterations):
+
+            # appending current-iteration network opinions to the 2d array (data)
+            data.append([node.value for node in network.nodes]) 
+
+            # updating opinions
+            defuant_update(network, beta=beta, threshold=threshold, is_network=True)
+
+        data = np.array(data)
+
+        # Plot results
+        defuant_plot(data, beta=beta, threshold=threshold)
+
 
 
 # test function - task 2
@@ -536,7 +589,6 @@ def test_defuant():
     This function will test the defuant_update function in the defuant model 
     '''
     
-
     print("Testing")
 
     test_opinions_c = np.random.uniform(0, 1, size=100)
@@ -558,7 +610,7 @@ def test_defuant():
     ## testing code (t1 & t2)
     for _ in range(1000):
         
-        defuant_update(test_opinions_n,beta=0.2,threshold=0.2)
+        defuant_update(test_opinions_n, beta=0.2, threshold=0.2)
         eq_mask = (test_opinions_c == test_opinions_n)
         updated_idx = np.where(eq_mask == False)[0]
         if updated_idx.shape[0] == 2:
@@ -634,6 +686,7 @@ def main():
     parser.add_argument("-re_wire", type=float, default=0.2, help="enter a float within a range of 0 and 1")
 
     # TASK 5 ARGS  
+    parser.add_argument("-use_network", type=int)
 
     
 
@@ -662,7 +715,7 @@ def main():
     is_defuant = args.defuant
     is_test_defuant = args.test_defuant
 
-    if is_defuant:
+    if is_defuant and not args.use_network:
         defuant_main(beta = beta, threshold = threshold)
     
     if is_test_defuant:
@@ -712,10 +765,13 @@ def main():
 
 
     # Task 5 
+    if args.defuant and args.use_network:
+        n = args.use_network
+        defuant_main(is_network=True, population=n ,beta=args.beta, threshold=args.threshold)
 
 
     ########################### End interpreting terminal flags ###########################
-
+   
 
 if __name__=="__main__":
     main()
