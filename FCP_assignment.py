@@ -22,12 +22,14 @@ class Network:
 
     def get_mean_degree(self):
 
+
         # iteration over each node in the network while summing up it's connections to find its degree
         NodeDegree = [sum(node.connections) for node in self.nodes]
 
         return sum(NodeDegree) / len(NodeDegree)
 
     def get_mean_clustering(self):
+
 
         # empty list
         clustering_coefficients = []
@@ -36,6 +38,8 @@ class Network:
 
             # iteration through connections of each node to find neighbours
             # if a connection exists, ==1
+            Number_of_neighbours = [self.nodes[i] for i, connection in enumerate(node.connections) if
+                                    connection == 1]
             Number_of_neighbours = [self.nodes[i] for i, connection in enumerate(node.connections) if
                                     connection == 1]
 
@@ -56,6 +60,7 @@ class Network:
                         node_connections += 1
 
             # Formula given:
+            # Formula given:
             possible_connections = len(Number_of_neighbours) * (len(Number_of_neighbours) - 1) / 2
 
             # To append the results
@@ -64,7 +69,16 @@ class Network:
         return sum(clustering_coefficients) / len(clustering_coefficients)
 
     def shortest_path_length(self, start_node):
+    def shortest_path_length(self, start_node):
 
+        # to track if a node has been visited:
+        is_visited = [False] * len(self.nodes)
+
+        Distance = [0] * len(self.nodes)
+        queue = [start_node]
+        is_visited[start_node.index] = True
+        Total_Distance = 0
+        node_count = 0
         # to track if a node has been visited:
         is_visited = [False] * len(self.nodes)
 
@@ -76,6 +90,8 @@ class Network:
 
         # To loop through nodes until every node has been processed:
         while queue:
+        # To loop through nodes until every node has been processed:
+        while queue:
 
             # To remove and return the first node from the queue for processing
             current_node = queue.pop(0)
@@ -84,7 +100,16 @@ class Network:
             node_count += 1
 
             Total_Distance += Distance[current_node.index]
+            # To remove and return the first node from the queue for processing
+            current_node = queue.pop(0)
 
+            # If a node has been visited:
+            node_count += 1
+
+            Total_Distance += Distance[current_node.index]
+
+            # Iteration over the neighbours (connections) of the current node
+            for i, connection in enumerate(current_node.connections):
             # Iteration over the neighbours (connections) of the current node
             for i, connection in enumerate(current_node.connections):
 
@@ -96,24 +121,42 @@ class Network:
                     Distance[i] = Distance[current_node.index] + 1
 
                     queue.append(self.nodes[i])
+                if connection == 1 and not is_visited[i]:
+                    # To mark a node as visited:
+                    is_visited[i] = True
 
+                    # To update the distance:
+                    Distance[i] = Distance[current_node.index] + 1
+
+                    queue.append(self.nodes[i])
+
+        if node_count == 1:
+            # When the only connection is to itself
         if node_count == 1:
             # When the only connection is to itself
 
             return 0
+            return 0
 
             # subtract the starting node
+        return Total_Distance / (node_count - 1)
         return Total_Distance / (node_count - 1)
 
     def get_mean_path_length(self):
 
         # To store the shortest path length from each node:
+    def get_mean_path_length(self):
+
+        # To store the shortest path length from each node:
         path_lengths_list = []
+
 
         # To iterate through each node and append the shortest path length to a list:
         for start_node in self.nodes:
             path_lengths_list.append(self.shortest_path_length(start_node))
+            path_lengths_list.append(self.shortest_path_length(start_node))
 
+        # Mean calculation:
         # Mean calculation:
         return sum(path_lengths_list) / len(self.nodes)
 
@@ -133,13 +176,32 @@ class Network:
                 if np.random.random() < connection_probability:
                     node.connections[neighbour_index] = 1
                     self.nodes[neighbour_index].connections[index] = 1
+    def make_random_network(self, N, connection_probability=0.5):
 
+        self.nodes = []
+
+        for node_number in range(N):
+            value = np.random.random()
+            connections = [0 for _ in range(N)]
+            self.nodes.append(Node(value, node_number, connections))
+
+        for (index, node) in enumerate(self.nodes):
+
+            for neighbour_index in range(index + 1, N):
+
+                if np.random.random() < connection_probability:
+                    node.connections[neighbour_index] = 1
+                    self.nodes[neighbour_index].connections[index] = 1
+
+    # to plot a network of size N with fixed probability of 0,5:
     # to plot a network of size N with fixed probability of 0,5:
     def plot_network(self):
 
         for node in self.nodes:
 
+
             for i, connection in enumerate(node.connections):
+
 
                 if connection == 1:
                     plt.plot([node.index, i], [node.value, self.nodes[i].value], 'k-', linewidth=0.8)
@@ -175,6 +237,8 @@ class Network:
 
 #making a ring network by adopting the concept of likelyhood but with a range of 1
 #the ring network does not achieve higher cluster coefficient and can be rewired
+#making a ring network by adopting the concept of likelyhood but with a range of 1
+#the ring network does not achieve higher cluster coefficient and can be rewired
     def make_ring_network(self,N,re_wire_prob=0.2):
         self.nodes = []
         for number in range(N):
@@ -189,6 +253,8 @@ class Network:
                 if neighbour_index!=number:
                     node.connections[neighbour_index]=1
 
+#this concept was used to design small world but it is not significant while making ring network
+#this part is optional however but it helped come up with the small world
 #this concept was used to design small world but it is not significant while making ring network
 #this part is optional however but it helped come up with the small world
         for number, node in enumerate(self.nodes):
@@ -341,6 +407,27 @@ def calculate_agreement(population, row, col, external=0.0):
     change_in_agreement = -2 * total_agreement
     return change_in_agreement
 
+    n_rows, n_cols = population.shape
+    current_opinion = population[row, col]
+    total_agreement = 0.0
+
+    # Calculate agreement with horizontal neighbors
+    left_neighbor = population[row, (col - 1) % n_cols]
+    right_neighbor = population[row, (col + 1) % n_cols]
+    total_agreement += current_opinion * left_neighbor + current_opinion * right_neighbor
+
+    # Calculate agreement with vertical neighbors
+    top_neighbor = population[(row - 1) % n_rows, col]
+    bottom_neighbor = population[(row + 1) % n_rows, col]
+    total_agreement += current_opinion * top_neighbor + current_opinion * bottom_neighbor
+
+    # Add contribution from external influence
+    total_agreement += 2 * external * current_opinion
+
+    # Calculate change in agreement if the cell flips its value
+    change_in_agreement = -2 * total_agreement
+    return change_in_agreement
+
 
 def ising_step(population, external=0.0):
     '''
@@ -349,12 +436,16 @@ def ising_step(population, external=0.0):
             external (float) - optional - the magnitude of any external "pull" on opinion
     '''
 
+
     n_rows, n_cols = population.shape
     row = np.random.randint(0, n_rows)
     col = np.random.randint(0, n_cols)
+    col = np.random.randint(0, n_cols)
 
     change_in_agreement = calculate_agreement(population, row, col, external)
+    change_in_agreement = calculate_agreement(population, row, col, external)
 
+    if change_in_agreement < 0 or np.random.rand() < np.exp(-change_in_agreement):
     if change_in_agreement < 0 or np.random.rand() < np.exp(-change_in_agreement):
         population[row, col] *= -1
 
@@ -396,7 +487,7 @@ def test_ising():
     assert (calculate_agreement(population, 1, 1, 10) == 14), "Test 9"
     assert (calculate_agreement(population, 1, 1, -10) == -6), "Test 10"
 
-    print("Tests passed")
+            print("Tests passed")
 
 def ising_main(population, alpha=None, external=0.0):
 
@@ -630,7 +721,8 @@ def main():
     # TASK 4 ARGS  
     parser.add_argument("-ring_network", type=int, help="enter a flag -ring_network and value")
     parser.add_argument("-small_world", type=int, help="enter a flag -small_network and value")
-    parser.add_argument("-probability",type=float,default=0.00001,help="enter a flag -probability followed by a float between 0 and 1")
+    parser.add_argument("-probability", type=float, default=0.00001,
+                        help="enter a flag -probability followed by a float between 0 and 1")
     parser.add_argument("-re_wire", type=float, default=0.2, help="enter a float within a range of 0 and 1")
 
     # TASK 5 ARGS  
@@ -704,7 +796,35 @@ def main():
     # Task 4 
     network = Network()
 
-    if args.ring_network is not None:
+    if args.test_network:
+
+        nodes = []
+        num_nodes = 10
+        for node_number in range(num_nodes):
+            connections = [1 for val in range(num_nodes)]
+            connections[node_number] = 0
+            new_node = Node(0, node_number, connections=connections)
+            nodes.append(new_node)
+        network = Network(nodes)
+
+        assert (network.get_mean_degree() == num_nodes - 1), network.get_mean_degree()
+        assert (network.get_mean_clustering() == 1), network.get_mean_clustering()
+        assert (network.get_mean_path_length() == 1), network.get_mean_path_length()
+        print("correct")
+
+    elif args.network:
+        network = Network()
+        network.make_random_network(size)
+        network.plot_network()
+
+        mean_degree = network.get_mean_degree()
+        mean_clustering = network.get_mean_clustering()
+        mean_path_length = network.get_mean_path_length()
+
+        print("Mean Degree:", mean_degree)
+        print("Mean Clustering Coefficient:", mean_clustering)
+        print("Mean Path Length:", mean_path_length)
+    elif args.ring_network is not None:
         network.make_ring_network(args.ring_network, args.probability)
         network.plot()
     elif args.small_world is not None:
