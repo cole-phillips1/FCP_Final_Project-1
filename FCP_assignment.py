@@ -150,7 +150,7 @@ class Network:
 
 
 
-    def make_random_network(self, N, connection_probability):
+    def make_random_network(self, N, connection_probability=0.5):
         '''
         This function makes a *random* network of size N.
         Each node is connected to each other node with probability p
@@ -310,7 +310,6 @@ def test_networks():
 This section contains code for the Ising Model - task 1 in the assignment
 ==============================================================================================================
 '''
-
 def calculate_agreement(population, row, col, external=0.0):
     '''
     This function should return the *change* in agreement that would result if the cell at (row, col) was to flip its value
@@ -321,10 +320,27 @@ def calculate_agreement(population, row, col, external=0.0):
     Returns:
             change_in_agreement (float)
     '''
+    n_rows, n_cols = population.shape
+    current_opinion = population[row, col]
+    total_agreement = 0.0
 
-    #Your code for task 1 goes here
+    # Calculate agreement with horizontal neighbors
+    left_neighbor = population[row, (col - 1) % n_cols]
+    right_neighbor = population[row, (col + 1) % n_cols]
+    total_agreement += current_opinion * left_neighbor + current_opinion * right_neighbor
 
-    return np.random * population
+    # Calculate agreement with vertical neighbors
+    top_neighbor = population[(row - 1) % n_rows, col]
+    bottom_neighbor = population[(row + 1) % n_rows, col]
+    total_agreement += current_opinion * top_neighbor + current_opinion * bottom_neighbor
+
+    # Add contribution from external influence
+    total_agreement += 2 * external * current_opinion
+
+    # Calculate change in agreement if the cell flips its value
+    change_in_agreement = -2 * total_agreement
+    return change_in_agreement
+
 
 def ising_step(population, external=0.0):
     '''
@@ -332,23 +348,20 @@ def ising_step(population, external=0.0):
     Inputs: population (numpy array)
             external (float) - optional - the magnitude of any external "pull" on opinion
     '''
-    
+
     n_rows, n_cols = population.shape
     row = np.random.randint(0, n_rows)
-    col  = np.random.randint(0, n_cols)
+    col = np.random.randint(0, n_cols)
 
-    agreement = calculate_agreement(population, row, col, external=0.0)
+    change_in_agreement = calculate_agreement(population, row, col, external)
 
-    if agreement < 0:
+    if change_in_agreement < 0 or np.random.rand() < np.exp(-change_in_agreement):
         population[row, col] *= -1
-
-    #Your code for task 1 goes here
 
 def plot_ising(im, population):
     '''
     This function will display a plot of the Ising model
     '''
-
     new_im = np.array([[255 if val == -1 else 1 for val in rows] for rows in population], dtype=np.int8)
     im.set_data(new_im)
     plt.pause(0.1)
@@ -357,38 +370,36 @@ def test_ising():
     '''
     This function will test the calculate_agreement function in the Ising model
     '''
-
     print("Testing ising model calculations")
     population = -np.ones((3, 3))
-    assert(calculate_agreement(population,1,1)==4), "Test 1"
+    assert (calculate_agreement(population, 1, 1) == 4), "Test 1"
 
     population[1, 1] = 1.
-    assert(calculate_agreement(population,1,1)==-4), "Test 2"
+    assert (calculate_agreement(population, 1, 1) == -4), "Test 2"
 
     population[0, 1] = 1.
-    assert(calculate_agreement(population,1,1)==-2), "Test 3"
+    assert (calculate_agreement(population, 1, 1) == -2), "Test 3"
 
     population[1, 0] = 1.
-    assert(calculate_agreement(population,1,1)==0), "Test 4"
+    assert (calculate_agreement(population, 1, 1) == 0), "Test 4"
 
     population[2, 1] = 1.
-    assert(calculate_agreement(population,1,1)==2), "Test 5"
+    assert (calculate_agreement(population, 1, 1) == 2), "Test 5"
 
     population[1, 2] = 1.
-    assert(calculate_agreement(population,1,1)==4), "Test 6"
+    assert (calculate_agreement(population, 1, 1) == 4), "Test 6"
 
     "Testing external pull"
     population = -np.ones((3, 3))
-    assert(calculate_agreement(population,1,1,1)==3), "Test 7"
-    assert(calculate_agreement(population,1,1,-1)==5), "Test 8"
-    assert(calculate_agreement(population,1,1,10)==14), "Test 9"
-    assert(calculate_agreement(population,1,1,-10)==-6), "Test 10"
+    assert (calculate_agreement(population, 1, 1, 1) == 3), "Test 7"
+    assert (calculate_agreement(population, 1, 1, -1) == 5), "Test 8"
+    assert (calculate_agreement(population, 1, 1, 10) == 14), "Test 9"
+    assert (calculate_agreement(population, 1, 1, -10) == -6), "Test 10"
 
     print("Tests passed")
 
-
 def ising_main(population, alpha=None, external=0.0):
-    
+
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.set_axis_off()
@@ -401,15 +412,13 @@ def ising_main(population, alpha=None, external=0.0):
             ising_step(population, external)
         print('Step:', frame, end='\r')
         plot_ising(im, population)
-
-
 '''
 ==============================================================================================================
 This section contains code for the Defuant Model - task 2 in the assignment
 ==============================================================================================================
 '''
 # helper function 1
-def defuant_update(opinions, beta, threshold):
+def defuant_update(opinions, beta, threshold, is_network=False):
     """
     Perform a single update according to the Deffuant model.
 
@@ -421,30 +430,66 @@ def defuant_update(opinions, beta, threshold):
     Returns:
         None
     """
+    
+    if is_network:
+        person = np.random.choice(opinions.nodes)
 
-    population = opinions.shape[0]
+        # Find indices where value is 1
+        indices_ones = np.where(np.array(person.connections) == 1)[0]
 
-    # Randomly select direction (left or right)
-    neighbour_dir = np.random.choice([1, -1])
+        #print(indices_ones)
 
-    # Randomly selecting a person's index and calculating its corresponding neighbour's index
-    person_idx = np.random.choice(population)
-    neighbour_idx = person_idx + neighbour_dir
+        t = indices_ones.shape[0]
 
-    # Ensure neighbour index stays within bounds
-    if person_idx == 0:
-        neighbour_idx = 1
-    elif person_idx == population - 1:
-        neighbour_idx = population - 2
+        # skip update if the node has no neighbours
+        if t == 0:
+            return None
 
-    # Get opinions of the two individuals
-    person = opinions[person_idx]
-    neighbour = opinions[neighbour_idx]
+        
+        # Choose a random index from the indices where value is 1
+        neighbour_index = np.random.choice(indices_ones)
+        neighbour = opinions.nodes[neighbour_index]
 
-    # Update opinions if difference is below threshold
-    if abs(person - neighbour) < threshold:
-        opinions[person_idx] += beta * (neighbour - person)
-        opinions[neighbour_idx] += beta * (person - neighbour)
+        peron_prev = person.value
+        neighbour_prev = neighbour.value
+
+        if abs(peron_prev - neighbour_prev) < threshold:
+                person.value += beta * (neighbour_prev - peron_prev)
+                neighbour.value += beta * (peron_prev - neighbour_prev)
+
+
+
+    else:
+        population = opinions.shape[0]
+
+        # skip update if no. opinions <= 1 
+        if population <= 1:
+            return None
+        
+        else:
+            # Randomly select direction (left or right)
+            neighbour_dir = np.random.choice([1, -1])
+
+            # Randomly selecting a person's index and calculating its corresponding neighbour's index
+            person_idx = np.random.choice(population)
+            neighbour_idx = person_idx + neighbour_dir
+
+            # Ensure neighbour index stays within bounds
+            if person_idx == 0:
+                neighbour_idx = 1
+            elif person_idx == population - 1:
+                neighbour_idx = population - 2
+
+            # Get opinions of the two individuals
+            person = opinions[person_idx]
+            neighbour = opinions[neighbour_idx]
+
+            # Update opinions if difference is below threshold
+            if abs(person - neighbour) < threshold:
+                opinions[person_idx] += beta * (neighbour - person)
+                opinions[neighbour_idx] += beta * (person - neighbour)
+
+        return True
 
 
 # helper function 2
@@ -468,6 +513,7 @@ def defuant_plot(iteration_data, beta, threshold):
     # Plotting
     fig, ax = plt.subplots(1, 2, figsize=(8, 4))
 
+
     ax[0].hist(iteration_data[-1])
     ax[0].set_xlim([0, 1])
     ax[0].set_xlabel("Opinion")
@@ -482,7 +528,7 @@ def defuant_plot(iteration_data, beta, threshold):
 
 
 # main function - task 2
-def defuant_main(population=25, iterations=1000, beta=0.5, threshold=0.5):
+def defuant_main(is_network = False, population=25, iterations=1000, beta=0.2, threshold=0.2):
     """
     Run the Deffuant model simulation and visualize the results.
 
@@ -495,31 +541,116 @@ def defuant_main(population=25, iterations=1000, beta=0.5, threshold=0.5):
     Returns:
         None
     """
-    # Generate initial opinions
-    initial_opinions = np.random.uniform(0, 1, size=population)
 
-    # Simulation loop
-    data = []
-    for _ in range(iterations):
+    if not is_network:
         
-        #appending current iteration opinions to the 2d array (data)
-        data.append(initial_opinions.copy()) 
+        # Generate initial 1D opinions
+        initial_opinions = np.random.uniform(0, 1, size=population) 
+        
+        # Simulation loop
+        data = []
+        for _ in range(iterations):
 
-        # updating opinions
-        defuant_update(initial_opinions, beta=beta, threshold=threshold)
+            #appending current iteration opinions to the 2d array (data)
+            data.append(initial_opinions.copy()) 
 
-    data = np.array(data)
+            # updating opinions
+            defuant_update(initial_opinions, beta=beta, threshold=threshold)
 
-    # Plot results
-    defuant_plot(data, beta=beta, threshold=threshold)
+        data = np.array(data)
+
+        # Plot results
+        defuant_plot(data, beta=beta, threshold=threshold)
+
+    else: 
+        network  =  Network()
+        network.make_random_network(N = population)
+
+        # Simulation loop
+        data = []
+        for _ in range(iterations):
+
+            # appending current-iteration network opinions to the 2d array (data)
+            data.append([node.value for node in network.nodes]) 
+
+            # updating opinions
+            defuant_update(network, beta=beta, threshold=threshold, is_network=True)
+
+        data = np.array(data)
+
+        # Plot results
+        defuant_plot(data, beta=beta, threshold=threshold)
+
 
 
 # test function - task 2
 def test_defuant():
-    #Your code for task 2 goes here
+    '''
+    This function will test the defuant_update function in the defuant model 
+    '''
     
-    pass
+    print("Testing")
 
+    test_opinions_c = np.random.uniform(0, 1, size=100)
+    test_opinions_n = test_opinions_c.copy()
+
+    # test 1: ensures only two neighbours get updated each iteration, or none 
+    test_1 = True
+
+    # test 2: ensures distant neighbours (distance > 1) not get updated 
+    test_2 = True
+
+    # test 3: ensures no update happens at threshold = 0
+    test_3 = True
+
+    # test 4: ensures system returns none at population == 1 or 0
+    test_4 = True
+
+
+    ## testing code (t1 & t2)
+    for _ in range(1000):
+        
+        defuant_update(test_opinions_n, beta=0.2, threshold=0.2)
+        eq_mask = (test_opinions_c == test_opinions_n)
+        updated_idx = np.where(eq_mask == False)[0]
+        if updated_idx.shape[0] == 2:
+            p1_idx , p2_idx = updated_idx 
+            distance = abs(p2_idx - p1_idx)
+            if distance != 1:
+                test_2 = False
+        
+        elif updated_idx.shape[0] == 0:
+            pass
+        
+        else:
+            test_1 = False
+
+        test_opinions_c = test_opinions_n.copy()
+    
+
+    ## testing code (t3)
+    test_opinions = np.random.uniform(0, 1, size=100)
+    test_opinions_updated = test_opinions.copy()
+
+    for _ in range(1000):
+        defuant_update(test_opinions_updated,beta=0.2,threshold=0)
+        eq_mask = (test_opinions == test_opinions_updated)
+        if eq_mask.all() != True:
+            test_3 = False
+    
+    ## testing code (t4)
+    test_4 = False if not (defuant_update(np.array([]),beta=0.2,threshold=0.2) or
+                      not defuant_update(np.random.uniform(0, 1,size=1),beta=0.2,threshold=0.2)) else True
+
+
+
+    assert(test_1), "test 1"
+    assert(test_2), "test 2"
+    assert(test_3), "test 3"
+    assert(test_4), "test 4"
+
+
+    print("Tests passed")
 
 '''
 ==============================================================================================================
@@ -528,35 +659,71 @@ This section contains code for the main function- you should write some code for
 '''
 
 def main():
-    ################################ TASK 1 ARGS #############################################
 
-    # write your arguments parsing code here 
+    parser = argparse.ArgumentParser(description='running tasks 1-5, fcp final project')
 
+    ########################### Adding Parser Arguments ###########################
 
+    # # TASK 1 ARGS  
+    # parser.add_argument('--ising', action='store_true', help='Run the Ising model')
+    # parser.add_argument('--network', action='store_true', help='Run the network model')
+    # parser.add_argument('--test', action='store_true', help='Run the tests')
 
-    ################################ TASK 2 ARGS  #############################################
+    # TASK 2 ARGS  
+    parser.add_argument('--defuant', '-defuant', action='store_true', help='runs the defuant model')
+    parser.add_argument("-beta",  type=float, default=0.2, help="beta parameter of the defuant model - default = 0.2")
+    parser.add_argument("-threshold",  type=float, default=0.2, help="threshold parameter of the defuant model - default = 0.2")
+    parser.add_argument('--test_defuant', '-test_defuant', action='store_true', help='runs the defuant model test function')
 
-    # write your arguments parsing code here 
-    
-
-
-#ALL flags be updated here
-    parser = argparse.ArgumentParser()
-
-#flags for task 3 start here
+    # TASK 3 ARGS  
     parser.add_argument("-network", type=int)
     parser.add_argument("-test_network", action='store_true')
-#flags for task 4 starts here
+
+    # TASK 4 ARGS  
     parser.add_argument("-ring_network", type=int, help="enter a flag -ring_network and value")
     parser.add_argument("-small_world", type=int, help="enter a flag -small_network and value")
-    parser.add_argument("-probability", type=float, default=0.00001,
-                        help="enter a flag -probability followed by a float between 0 and 1")
+    parser.add_argument("-probability",type=float,default=0.00001,help="enter a flag -probability followed by a float between 0 and 1")
     parser.add_argument("-re_wire", type=float, default=0.2, help="enter a float within a range of 0 and 1")
 
+    # TASK 5 ARGS  
+    parser.add_argument("-use_network", type=int)
+
+    
+
+    ########################### End Adding Parser Arguments ###########################
+    
     args = parser.parse_args()
+
+    ########################### interpreting terminal flags ###########################
+    
+    # #Task 1
+    # if args.ising:
+    #     population = -np.ones((100, 100))
+    #     ising_main(population)
+
+    # elif args.network:
+    #     network = Network()
+    #     network.make_random_network(10)
+    #     network.plot()
+    #     plt.show()
+    # elif args.test:
+    #     test_ising()
+
+    # Task 2
+    beta = args.beta
+    threshold = args.threshold
+    is_defuant = args.defuant
+    is_test_defuant = args.test_defuant
+
+    if is_defuant and not args.use_network:
+        defuant_main(beta = beta, threshold = threshold)
+    
+    if is_test_defuant:
+        test_defuant()
+
+    # Task 3 
     size = args.network
-    network = Network()
-#if block for task 3
+
     if args.test_network:
 
         nodes = []
@@ -573,11 +740,10 @@ def main():
         assert (network.get_mean_path_length() == 1), network.get_mean_path_length()
         print("correct")
 
-    elif args.network:
+    if args.network:
         network = Network()
         network.make_random_network(size)
         network.plot_network()
-
         mean_degree = network.get_mean_degree()
         mean_clustering = network.get_mean_clustering()
         mean_path_length = network.get_mean_path_length()
@@ -585,16 +751,27 @@ def main():
         print("Mean Degree:", mean_degree)
         print("Mean Clustering Coefficient:", mean_clustering)
         print("Mean Path Length:", mean_path_length)
-#elif blocks for task 4 are added here
-    elif args.ring_network is not None:
+
+        
+    # Task 4 
+    network = Network()
+
+    if args.ring_network is not None:
         network.make_ring_network(args.ring_network, args.probability)
         network.plot()
     elif args.small_world is not None:
         network.make_small_world_network(args.small_world, args.re_wire)
         network.plot()
-    else:
-        print("Set either -ring_network or -small_world flag followed by the re_wiring between 0 and 1")
 
-#add if elif  and else blocks here  for all other tasks ......
+
+    # Task 5 
+    if args.defuant and args.use_network:
+        n = args.use_network
+        defuant_main(is_network=True, population=n ,beta=args.beta, threshold=args.threshold)
+
+
+    ########################### End interpreting terminal flags ###########################
+   
+
 if __name__=="__main__":
     main()
