@@ -150,7 +150,7 @@ class Network:
 
 
 
-    def make_random_network(self, N, connection_probability):
+    def make_random_network(self, N, connection_probability=0.5):
         '''
         This function makes a *random* network of size N.
         Each node is connected to each other node with probability p
@@ -612,10 +612,10 @@ def main():
 
     ########################### Adding Parser Arguments ###########################
 
-    # TASK 1 ARGS  
-    parser.add_argument('--ising', action='store_true', help='Run the Ising model')
-    parser.add_argument('--network', action='store_true', help='Run the network model')
-    parser.add_argument('--test', action='store_true', help='Run the tests')
+    # # TASK 1 ARGS  
+    # parser.add_argument('--ising', action='store_true', help='Run the Ising model')
+    # parser.add_argument('--network', action='store_true', help='Run the network model')
+    # parser.add_argument('--test', action='store_true', help='Run the tests')
 
     # TASK 2 ARGS  
     parser.add_argument('--defuant', '-defuant', action='store_true', help='runs the defuant model')
@@ -643,18 +643,18 @@ def main():
 
     ########################### interpreting terminal flags ###########################
     
-    # Task 1
-    if args.ising:
-        population = -np.ones((100, 100))
-        ising_main(population)
+    # #Task 1
+    # if args.ising:
+    #     population = -np.ones((100, 100))
+    #     ising_main(population)
 
-    elif args.network:
-        network = Network()
-        network.make_random_network(10)
-        network.plot()
-        plt.show()
-    elif args.test:
-        test_ising()
+    # elif args.network:
+    #     network = Network()
+    #     network.make_random_network(10)
+    #     network.plot()
+    #     plt.show()
+    # elif args.test:
+    #     test_ising()
 
     # Task 2
     beta = args.beta
@@ -691,7 +691,6 @@ def main():
         network = Network()
         network.make_random_network(size)
         network.plot_network()
-
         mean_degree = network.get_mean_degree()
         mean_clustering = network.get_mean_clustering()
         mean_path_length = network.get_mean_path_length()
