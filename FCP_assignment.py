@@ -676,7 +676,7 @@ def main():
     parser.add_argument('--test_defuant', '-test_defuant', action='store_true', help='runs the defuant model test function')
 
     # TASK 3 ARGS  
-    parser.add_argument("-network", type=int)
+    parser.add_argument("-network", type=int, help= "runs the network, add an integer value to choose the size of the network")
     parser.add_argument("-test_network", action='store_true')
 
     # TASK 4 ARGS  
