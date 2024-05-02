@@ -169,10 +169,6 @@ class Network:
                     self.nodes[neighbour_index].connections[index] = 1
 
 
-
-
-
-
 #making a ring network by adopting the concept of likelyhood but with a range of 1
 #the ring network does not achieve higher cluster coefficient and can be rewired
     def make_ring_network(self,N,re_wire_prob=0.2):
@@ -310,16 +306,8 @@ def test_networks():
 This section contains code for the Ising Model - task 1 in the assignment
 ==============================================================================================================
 '''
-def calculate_agreement(population, row, col, external=0.0):
-    '''
-    This function should return the *change* in agreement that would result if the cell at (row, col) was to flip its value
-    Inputs: population (numpy array)
-            row (int)
-            col (int)
-            external (float)
-    Returns:
-            change_in_agreement (float)
-    '''
+def calculate_agreement(population, row, col,alpha=1.0, external=0.0):
+
     n_rows, n_cols = population.shape
     current_opinion = population[row, col]
     total_agreement = 0.0
@@ -339,37 +327,27 @@ def calculate_agreement(population, row, col, external=0.0):
 
     # Calculate change in agreement if the cell flips its value
     change_in_agreement = -2 * total_agreement
+    change_in_agreement/=alpha
     return change_in_agreement
 
 
-def ising_step(population, external=0.0):
-    '''
-    This function will perform a single update of the Ising model
-    Inputs: population (numpy array)
-            external (float) - optional - the magnitude of any external "pull" on opinion
-    '''
+def ising_step(population, external=0.0,alpha=1.0):
 
     n_rows, n_cols = population.shape
     row = np.random.randint(0, n_rows)
     col = np.random.randint(0, n_cols)
 
-    change_in_agreement = calculate_agreement(population, row, col, external)
+    change_in_agreement = calculate_agreement(population, row, col, external,alpha)
 
     if change_in_agreement < 0 or np.random.rand() < np.exp(-change_in_agreement):
         population[row, col] *= -1
 
 def plot_ising(im, population):
-    '''
-    This function will display a plot of the Ising model
-    '''
     new_im = np.array([[255 if val == -1 else 1 for val in rows] for rows in population], dtype=np.int8)
     im.set_data(new_im)
-    plt.pause(0.1)
+    plt.show()
 
 def test_ising():
-    '''
-    This function will test the calculate_agreement function in the Ising model
-    '''
     print("Testing ising model calculations")
     population = -np.ones((3, 3))
     assert (calculate_agreement(population, 1, 1) == 4), "Test 1"
@@ -398,7 +376,7 @@ def test_ising():
 
     print("Tests passed")
 
-def ising_main(population, alpha=None, external=0.0):
+def ising_main(population, alpha=1.0, external=0.0):
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -409,7 +387,7 @@ def ising_main(population, alpha=None, external=0.0):
     for frame in range(100):
         # Iterating single steps 1000 times to form an update
         for step in range(1000):
-            ising_step(population, external)
+            ising_step(population, external,alpha)
         print('Step:', frame, end='\r')
         plot_ising(im, population)
 '''
@@ -512,8 +490,6 @@ def defuant_plot(iteration_data, beta, threshold):
 
     # Plotting
     fig, ax = plt.subplots(1, 2, figsize=(8, 4))
-
-
     ax[0].hist(iteration_data[-1])
     ax[0].set_xlim([0, 1])
     ax[0].set_xlabel("Opinion")
@@ -661,13 +637,11 @@ This section contains code for the main function- you should write some code for
 def main():
 
     parser = argparse.ArgumentParser(description='running tasks 1-5, fcp final project')
-
-    ########################### Adding Parser Arguments ###########################
-
-    # # TASK 1 ARGS  
-    # parser.add_argument('--ising', action='store_true', help='Run the Ising model')
-    # parser.add_argument('--network', action='store_true', help='Run the network model')
-    # parser.add_argument('--test', action='store_true', help='Run the tests')
+    #TASK 1 ARGS
+    parser.add_argument('-ising_model', action='store_true', help='Run the Ising model')
+    parser.add_argument("-external", type=float, default=0.0, help="external influence is zero")
+    parser.add_argument("-alpha", type=float, default=1.0, help="temperature default is 1")
+    parser.add_argument("-test_ising", action="store_true", help="running test for the ising model")
 
     # TASK 2 ARGS  
     parser.add_argument('--defuant', '-defuant', action='store_true', help='runs the defuant model')
@@ -687,27 +661,17 @@ def main():
 
     # TASK 5 ARGS  
     parser.add_argument("-use_network", type=int)
-
-    
-
-    ########################### End Adding Parser Arguments ###########################
-    
     args = parser.parse_args()
 
     ########################### interpreting terminal flags ###########################
     
-    # #Task 1
-    # if args.ising:
-    #     population = -np.ones((100, 100))
-    #     ising_main(population)
+    if args.ising_model:
+        population = -np.ones((100, 100))
+        ising_step(population,external=args.external)
+        ising_main(population,alpha=args.alpha,external=args.external)
 
-    # elif args.network:
-    #     network = Network()
-    #     network.make_random_network(10)
-    #     network.plot()
-    #     plt.show()
-    # elif args.test:
-    #     test_ising()
+    if args.test_ising:
+        test_ising()
 
     # Task 2
     beta = args.beta
@@ -763,15 +727,11 @@ def main():
         network.make_small_world_network(args.small_world, args.re_wire)
         network.plot()
 
-
     # Task 5 
     if args.defuant and args.use_network:
         n = args.use_network
         defuant_main(is_network=True, population=n ,beta=args.beta, threshold=args.threshold)
 
-
-    ########################### End interpreting terminal flags ###########################
-   
 
 if __name__=="__main__":
     main()
