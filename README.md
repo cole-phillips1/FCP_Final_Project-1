@@ -8,6 +8,40 @@ Repo Link : https://github.com/abdalrahimnaser/FCP_Final_Project
 * argparse
 
 <h3>Task 1 (Ising Model - Cole): </h3>
+Opinion Dynamics Simulation
+
+Overview: This research uses a variety of models, such as the Defuant Model and the Ising Model, to mimic opinion dynamics within populations. It also has capability for simulating social networks to depict interpersonal relationships.
+
+Implemented Models:
+
+Ising Model: This model represents agents as spins on a lattice and uses statistical mechanics to simulate opinion dynamics. Defuant Model: This model seeks to explain how people with different viewpoints interact with one another in order to determine if polarisation or consensus forms.
+
+Dependencies:
+
+Python 3
+
+NumPy
+
+Matplotlib
+
+Usage:
+
+Ising Model: python assignment.py -model ising.
+
+Defuant Model: python assignment.py -model defuant
+
+Network Creation and Plotting: python assignment.py -network <N> -N: Number of nodes for the network.
+
+Testing: Run the following commands to perform tests:
+
+Ising Model: python assignment.py -test_ising
+
+Defuant Model: python assignment.py -test_defuant
+
+Network Functionality: python assignment.py -test_network
+
+GitHub Repository: Link: <repository_url>
+
 
 <h3>Task 2 (Defuant Model - Abdalrahim):</h3>
   
