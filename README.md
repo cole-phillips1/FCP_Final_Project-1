@@ -1,6 +1,11 @@
 ----------------------------------
-Repo Link : https://github.com/abdalrahimnaser/FCP_Final_Project
+Opinion Dynamics Simulation  
 ----------------------------------
+
+<h3>Overview:</h3>
+
+This research uses a variety of models, such as the Defuant Model and the Ising Model, to mimic opinion dynamics within populations. It also has capability for simulating social networks to depict interpersonal relationships.</h1>
+
 <h3>Packages required:</h3>
 
 * matplotlib
@@ -8,39 +13,12 @@ Repo Link : https://github.com/abdalrahimnaser/FCP_Final_Project
 * argparse
 
 <h3>Task 1 (Ising Model - Cole): </h3>
-Opinion Dynamics Simulation
 
-Overview: This research uses a variety of models, such as the Defuant Model and the Ising Model, to mimic opinion dynamics within populations. It also has capability for simulating social networks to depict interpersonal relationships.
+* Ising Model: This model represents agents as spins on a lattice and uses statistical mechanics to simulate opinion dynamics. Defuant Model: This model seeks to explain how people with different viewpoints interact with one another in order to determine if polarisation or consensus forms.  
 
-Implemented Models:
+* running: python assignment.py -ising_model (default model) followed by -external and -alpha for adjusting parameters.
 
-Ising Model: This model represents agents as spins on a lattice and uses statistical mechanics to simulate opinion dynamics. Defuant Model: This model seeks to explain how people with different viewpoints interact with one another in order to determine if polarisation or consensus forms.
-
-Dependencies:
-
-Python 3
-
-NumPy
-
-Matplotlib
-
-Usage:
-
-Ising Model: python assignment.py -model ising.
-
-Defuant Model: python assignment.py -model defuant
-
-Network Creation and Plotting: python assignment.py -network <N> -N: Number of nodes for the network.
-
-Testing: Run the following commands to perform tests:
-
-Ising Model: python assignment.py -test_ising
-
-Defuant Model: python assignment.py -test_defuant
-
-Network Functionality: python assignment.py -test_network
-
-GitHub Repository: Link: <repository_url>
+* testing: python assignment.py -test_ising
 
 
 <h3>Task 2 (Defuant Model - Abdalrahim):</h3>
@@ -78,3 +56,8 @@ Python FCP_assignment.py -small_world 20 -re_wire 0.98
 * to run : use flags <em>-defuant </em> folowed by <em>-use_network N</em> where N is the number of nodes in the network  
 * node connection probability is fixed at 0.5  
 
+
+
+----------------------------------
+Repo Link : https://github.com/abdalrahimnaser/FCP_Final_Project
+----------------------------------
