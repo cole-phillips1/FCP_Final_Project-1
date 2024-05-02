@@ -399,18 +399,7 @@ This section contains code for the Defuant Model - task 2 in the assignment
 '''
 # helper function 1
 def defuant_update(opinions, beta, threshold, is_network=False):
-    """
-    Perform a single update according to the Deffuant model.
 
-    Args:
-        opinions (numpy.ndarray): Array representing opinions of individuals.
-        beta (float): Coupling parameter.
-        threshold (float): Threshold parameter.
-
-    Returns:
-        None
-    """
-    
     if is_network:
         person = np.random.choice(opinions.nodes)
 
@@ -436,8 +425,6 @@ def defuant_update(opinions, beta, threshold, is_network=False):
         if abs(peron_prev - neighbour_prev) < threshold:
                 person.value += beta * (neighbour_prev - peron_prev)
                 neighbour.value += beta * (peron_prev - neighbour_prev)
-
-
 
     else:
         population = opinions.shape[0]
@@ -474,18 +461,6 @@ def defuant_update(opinions, beta, threshold, is_network=False):
 
 # helper function 2
 def defuant_plot(iteration_data, beta, threshold):
-    """
-    Plot the evolution of opinions over iterations and a histogram of final opinions.
-
-    Args:
-        iteration_data (numpy.ndarray): Array containing opinions at each iteration.
-        beta (float): Coupling parameter.
-        threshold (float): Threshold parameter.
-
-    Returns:
-        None
-    """
-
     # Create an array of indices for plotting
     indices = np.arange(iteration_data.shape[0]).reshape(-1, 1)
     duplicated_indices = np.tile(indices, (1, iteration_data.shape[1]))
