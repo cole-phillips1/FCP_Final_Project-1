@@ -18,19 +18,20 @@ Repo Link : https://github.com/abdalrahimnaser/FCP_Final_Project
 
 <h3>Task 3 (Networks- Stephanos Prodromou):</h3> 
 
-* To run: <em>-test network -network N </em> where N is an integer representing the size of the random network that will be created ( number of nodes it will have )  
+* To run/test: <em>-test network -network N </em> where N is an integer representing the size of the random network that will be created ( number of nodes it will have )  
 * Fixed probability of connection of 0.5.  
 * In order forr the results of the 3 functions to be printed, the plotted graph tab should be closed.  
 
 <h3>Task 4 (Small World networks - Magoma Onkoba): </h3>
+
 *  To get the visualization of ring network of a given size use the following code in the GitHub repository:
-Python FCP_assignment.py -ring_network 20
+Python FCP_assignment.py -ring_network 20  
 * To get the visualization of small world network with a re_wire probability very low, use the following code:
-Python FCP_assignment.py -small_world 20 -re_wire 0.00001
+Python FCP_assignment.py -small_world 20 -re_wire 0.00001  
 *  To get a small world network visualization with a default probability of 0.2 use the following code:
-Python FCP_assignment.py -small_world 20
+Python FCP_assignment.py -small_world 20  
 * To get a small world network visualization with a probability very high use the following code:
-Python FCP_assignment.py -small_world 20 -re_wire 0.98
+Python FCP_assignment.py -small_world 20 -re_wire 0.98  
 * These flags are case sensitive and they should be used as specified in the code examples.Probability should be between 0 and 1.
 
 

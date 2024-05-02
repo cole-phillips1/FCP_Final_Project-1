@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import argparse
 
+#task 3:
 
 class Node:
 
@@ -149,7 +150,8 @@ class Network:
         plt.show()
 
 
-
+#task 4
+    
     def make_random_network(self, N, connection_probability=0.5):
         '''
         This function makes a *random* network of size N.
@@ -651,7 +653,7 @@ def main():
 
     # TASK 3 ARGS  
     parser.add_argument("-network", type=int, help= "runs the network, add an integer value to choose the size of the network")
-    parser.add_argument("-test_network", action='store_true')
+    parser.add_argument("-test_network", action='store_true' , help= "prints the results required")
 
     # TASK 4 ARGS  
     parser.add_argument("-ring_network", type=int, help="enter a flag -ring_network and value")
