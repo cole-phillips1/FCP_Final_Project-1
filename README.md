@@ -18,7 +18,7 @@ Repo Link : https://github.com/abdalrahimnaser/FCP_Final_Project
 
 <h3>Task 3 (Networks- Stephanos Prodromou):</h3> 
 
-* To run: <em>-test network -network N </em> where N is an integer representing the size of the random network that will be created ( number of nodes it will have )  
+* To run/test: <em>-test network -network N </em> where N is an integer representing the size of the random network that will be created ( number of nodes it will have )  
 * Fixed probability of connection of 0.5.  
 * In order forr the results of the 3 functions to be printed, the plotted graph tab should be closed.  
 
