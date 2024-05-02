@@ -679,7 +679,7 @@ def main():
 
     # TASK 3 ARGS  
     parser.add_argument("-network", type=int, help= "runs the network, add an integer value to choose the size of the network")
-    parser.add_argument("-test_network", action='store_true')
+    parser.add_argument("-test_network", action='store_true' , help= "prints the results required")
 
     # TASK 4 ARGS  
     parser.add_argument("-ring_network", type=int, help="enter a flag -ring_network and value")
